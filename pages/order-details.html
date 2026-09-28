@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order details | GreenLife</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/pages.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+  <main class="page-shell">
+    <div class="page-hero">
+      <div>
+        <p class="eyebrow">Your order</p>
+        <h1>Order <em>details.</em></h1>
+      </div>
+    </div>
+
+    <section class="form-card order-detail-card">
+      <form id="order-detail-form" class="toolbar">
+        <input id="order-id" type="number" min="1" placeholder="Enter order number" required />
+        <button class="button button-dark" type="submit">Show details</button>
+      </form>
+      <div id="order-detail-result"></div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="/js/pages.js"></script>
+  <script>
+    document.getElementById('order-detail-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const result = document.getElementById('order-detail-result');
+      const id = document.getElementById('order-id').value;
+      try {
+        const order = await fetch(`/api/orders/${id}`).then(async response => {
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || 'Order not found');
+          return data;
+        });
+        result.innerHTML = `
+          <div class="order-card-details">
+            <h2>Order #${order.id}</h2>
+            <p><strong>Customer:</strong> ${order.customer_name}</p>
+            <p><strong>Email:</strong> ${order.email}</p>
+            <p><strong>Address:</strong> ${order.address}</p>
+            <p><strong>Status:</strong> ${order.status}</p>
+            <p><strong>Total:</strong> Rs. ${Number(order.total).toLocaleString('en-IN')}</p>
+            <div class="order-item-list">
+              ${order.items.map(item => `<div class="order-line"><span>${item.name} × ${item.quantity}</span><strong>Rs. ${Number(item.unit_price * item.quantity).toLocaleString('en-IN')}</strong></div>`).join('')}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        result.innerHTML = `<div class="api-error">${error.message}</div>`;
+      }
+    });
+    const savedOrderId = new URLSearchParams(window.location.search).get('order') || localStorage.getItem('greenlife-last-order-id');
+    if (savedOrderId) {
+      document.getElementById('order-id').value = savedOrderId;
+      document.getElementById('order-detail-form').requestSubmit();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Sign in or create your GreenLife Store profile">
+  <title>Sign in | GreenLife</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="/css/accent.css">
+  <style>
+    body{min-height:100vh;background:linear-gradient(135deg,#f6f7f1 0%,#fffefa 58%,#dbe7d5 100%)}.login-page{min-height:100vh;align-items:center;padding:40px 5%}.login-card{width:min(560px,100%);padding:42px 44px;box-shadow:0 24px 70px rgba(30,43,32,.1)}.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-size:22px;font-weight:700;letter-spacing:-.06em}.login-brand .brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--leaf);color:#fff;font-family:var(--serif);font-size:21px}.login-brand span span{color:var(--leaf)}.login-card h1{margin:0;font:600 clamp(36px,6vw,58px)/.98 var(--serif);letter-spacing:-.07em}.login-card h1 em{font-style:normal;color:var(--leaf)}.login-card #login-copy{color:var(--muted);margin:16px 0 26px}.login-card .button{width:100%;margin-top:8px}.login-help{margin-top:22px}
+    .login-tabs{display:flex;gap:18px;margin:18px 0 0;border-bottom:1px solid var(--line)}.login-tab{padding:10px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font:inherit;cursor:pointer}.login-tab.active{border-bottom-color:var(--leaf);color:var(--leaf);font-weight:700}.login-tab:focus-visible{outline:2px solid var(--leaf);outline-offset:3px}
+    .login-card .form-field input:focus,.login-card .form-field select:focus{border-color:var(--leaf);outline:2px solid rgba(49,105,69,.28);outline-offset:1px;box-shadow:0 0 0 3px rgba(49,105,69,.1);caret-color:var(--leaf)}
+  </style>
+</head>
+<body>
+  <main class="page-shell login-page">
+    <div class="login-card form-card">
+      <a class="login-brand" href="/login.html"><span class="brand-mark">G</span><span>green<span>life</span></span></a>
+      <p class="eyebrow">Welcome to GreenLife</p>
+      <h1 id="login-title">Sign in to your <em>good life.</em></h1>
+      <p id="login-copy">Use your customer account or admin credentials to continue.</p>
+      <form id="login-form" data-mode="signin" autocomplete="off">
+        <div class="form-field register-only"><label for="full-name">Full name</label><input id="full-name" name="full_name" autocomplete="name"></div>
+        <div class="form-field"><label for="login-email">Email address</label><input id="login-email" name="email" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email" required></div>
+        <div class="form-field register-only"><label for="phone">Phone number</label><input id="phone" name="phone" type="tel" autocomplete="tel"></div>
+        <div class="form-field"><label for="login-password">Password</label><input id="login-password" name="password" type="password" placeholder="Minimum 6 characters" autocomplete="new-password" minlength="6" required></div>
+        <button class="button button-dark" id="login-submit" type="submit">Sign in <i data-lucide="arrow-right"></i></button>
+        <div class="login-tabs"><button class="login-tab active" type="button" data-mode="signin">Sign in</button><button class="login-tab" type="button" data-mode="register">Create profile</button></div>
+        <p id="login-message" aria-live="polite"></p>
+      </form>
+    </div>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

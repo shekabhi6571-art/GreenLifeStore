@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delivery tracking | GreenLife</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/pages.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+  <main class="page-shell">
+    <div class="page-hero">
+      <div>
+        <p class="eyebrow">Delivery updates</p>
+        <h1>Track your <em>shipment.</em></h1>
+      </div>
+    </div>
+
+    <section class="form-card delivery-card">
+      <form id="delivery-form" class="toolbar">
+        <input id="delivery-order-id" type="number" min="1" placeholder="Enter order number" required />
+        <button class="button button-dark" type="submit">Track delivery</button>
+      </form>
+      <div id="delivery-result"></div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="/js/pages.js"></script>
+  <script>
+    document.getElementById('delivery-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const result = document.getElementById('delivery-result');
+      const id = document.getElementById('delivery-order-id').value;
+      try {
+        const order = await fetch(`/api/orders/${id}`).then(async response => {
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || 'Order not found');
+          return data;
+        });
+        const statuses = ['Placed', 'Packed', 'Shipped', 'Delivered'];
+        const current = statuses.indexOf(order.status);
+        result.innerHTML = `
+          <div class="tracking-line">
+            ${statuses.map((status, index) => `<div class="track-node ${index <= current ? 'done' : ''}"><span>${index <= current ? '✓' : index + 1}</span>${status}</div>`).join('')}
+          </div>
+          <div class="delivery-summary">
+            <h2>Order #${order.id}</h2>
+            <p><strong>Customer:</strong> ${order.customer_name}</p>
+            <p><strong>Address:</strong> ${order.address}</p>
+            <p><strong>Current status:</strong> ${order.status}</p>
+          </div>
+        `;
+      } catch (error) {
+        result.innerHTML = `<div class="api-error">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
