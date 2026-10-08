@@ -43,6 +43,33 @@ def test_registered_customer_can_sign_in(tmp_path):
     assert session["email"] == "new.customer@example.com"
 
 
+def test_phone_number_must_be_exactly_10_digits():
+    with pytest.raises(Exception):
+        main.ProfileCreate(
+            full_name="Test User",
+            email="test@example.com",
+            password="password123",
+            phone="123456789",
+        )
+
+    with pytest.raises(Exception):
+        main.ProfileCreate(
+            full_name="Test User",
+            email="test@example.com",
+            password="password123",
+            phone="12345678901",
+        )
+
+    profile = main.ProfileCreate(
+        full_name="Test User",
+        email="test@example.com",
+        password="password123",
+        phone="9876543210",
+    )
+
+    assert profile.phone == "9876543210"
+
+
 def test_login_role_selection_is_enforced(monkeypatch):
     monkeypatch.setattr(main, "ADMIN_EMAIL", "admin@example.com")
     monkeypatch.setattr(main, "ADMIN_PASSWORD", "private-admin-password")

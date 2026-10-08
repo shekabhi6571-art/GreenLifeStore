@@ -5,6 +5,15 @@ const registerFields = document.querySelectorAll('.register-only');
 const title = document.querySelector('#login-title');
 const copy = document.querySelector('#login-copy');
 const submit = document.querySelector('#login-submit');
+const phoneField = document.querySelector('#phone');
+if (phoneField) {
+  phoneField.setAttribute('inputmode', 'numeric');
+  phoneField.setAttribute('maxlength', '10');
+  phoneField.setAttribute('pattern', '[0-9]{10}');
+  phoneField.addEventListener('input', () => {
+    phoneField.value = phoneField.value.replace(/\D/g, '').slice(0, 10);
+  });
+}
 const roleField = document.createElement('div');
 roleField.className = 'form-field login-role-field';
 roleField.innerHTML = '<label for="login-role">Continue as</label><select id="login-role" name="role"><option value="customer">User</option><option value="admin">Admin</option></select>';
@@ -44,6 +53,13 @@ form.addEventListener('submit', async event => {
   const registering = form.dataset.mode === 'register';
   const endpoint = registering ? '/api/auth/register' : '/api/auth/login';
   try {
+    if (registering) {
+      const cleanedPhone = (data.phone || '').replace(/\D/g, '');
+      if (cleanedPhone.length !== 10) {
+        throw new Error('Phone number must be exactly 10 digits.');
+      }
+      data.phone = cleanedPhone;
+    }
     const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     const result = await response.json();
     if (!response.ok) throw new Error(requestErrorMessage(result.detail, 'Request failed'));

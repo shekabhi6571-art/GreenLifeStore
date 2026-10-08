@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 import hashlib
 import hmac
 import os
+import re
 from pathlib import Path
 from secrets import token_urlsafe
 from sqlite3 import Connection, Row, connect
@@ -330,7 +331,7 @@ class ProfileCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=100)
     email: EmailStr
     password: str = Field(min_length=6, max_length=100)
-    phone: str = Field(min_length=7, max_length=20)
+    phone: str = Field(pattern=r"^\d{10}$")
 
 
 def hash_password(password: str) -> str:
@@ -449,12 +450,15 @@ def create_review(product_id: int, review: ReviewCreate) -> dict:
 def register_profile(profile: ProfileCreate) -> dict[str, str]:
     if ADMIN_EMAIL and profile.email.lower() == ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin profile cannot be created here")
+    normalized_phone = re.sub(r"\D", "", profile.phone)
+    if len(normalized_phone) != 10:
+        raise HTTPException(status_code=400, detail="Phone number must be exactly 10 digits")
     with get_connection() as connection:
         if connection.execute("SELECT id FROM users WHERE email = ?", (str(profile.email).lower(),)).fetchone():
             raise HTTPException(status_code=409, detail="A profile with this email already exists")
         connection.execute(
             "INSERT INTO users (full_name, email, password_hash, phone) VALUES (?, ?, ?, ?)",
-            (profile.full_name.strip(), str(profile.email).lower(), hash_password(profile.password), profile.phone.strip()),
+            (profile.full_name.strip(), str(profile.email).lower(), hash_password(profile.password), normalized_phone),
         )
         connection.commit()
     return {"message": "Profile created. You can now sign in."}
