@@ -6,12 +6,30 @@ const title = document.querySelector('#login-title');
 const copy = document.querySelector('#login-copy');
 const submit = document.querySelector('#login-submit');
 const phoneField = document.querySelector('#phone');
+
+function isValidPhoneNumber(value) {
+  return /^\d{10}$/.test((value || '').trim());
+}
+
+function updateRegisterSubmitState() {
+  if (!phoneField || form.dataset.mode !== 'register') {
+    submit.disabled = false;
+    return;
+  }
+  const valid = isValidPhoneNumber(phoneField.value);
+  submit.disabled = !valid;
+  submit.style.opacity = valid ? '1' : '0.6';
+  submit.style.cursor = valid ? 'pointer' : 'not-allowed';
+}
+
 if (phoneField) {
   phoneField.setAttribute('inputmode', 'numeric');
   phoneField.setAttribute('maxlength', '10');
   phoneField.setAttribute('pattern', '[0-9]{10}');
+  phoneField.setAttribute('required', 'required');
   phoneField.addEventListener('input', () => {
     phoneField.value = phoneField.value.replace(/\D/g, '').slice(0, 10);
+    updateRegisterSubmitState();
   });
 }
 const roleField = document.createElement('div');
@@ -25,7 +43,13 @@ function requestErrorMessage(detail, fallback) {
     if (detail.some(issue => issue.loc?.includes('email'))) {
       return 'Enter a valid email address, such as name@example.com.';
     }
+    if (detail.some(issue => issue.type === 'value_error' || issue.type === 'string_pattern_mismatch')) {
+      return 'Phone number must be exactly 10 digits.';
+    }
     return detail.map(issue => issue.msg).filter(Boolean).join('. ') || fallback;
+  }
+  if (typeof detail === 'string' && detail.includes('pattern')) {
+    return 'Phone number must be exactly 10 digits.';
   }
   return typeof detail === 'string' ? detail : fallback;
 }
@@ -40,6 +64,9 @@ function setMode(mode) {
   title.innerHTML = registering ? 'Create your <em>GreenLife profile.</em>' : 'Sign in to your <em>good life.</em>';
   copy.textContent = registering ? 'Save your wishlist, track orders, and make every purchase more personal.' : 'Use your customer account or admin credentials to continue.';
   submit.innerHTML = registering ? 'Create profile <i data-lucide="user-plus"></i>' : 'Sign in <i data-lucide="arrow-right"></i>';
+  submit.disabled = registering ? !isValidPhoneNumber(phoneField?.value || '') : false;
+  submit.style.opacity = registering && !isValidPhoneNumber(phoneField?.value || '') ? '0.6' : '1';
+  submit.style.cursor = registering && !isValidPhoneNumber(phoneField?.value || '') ? 'not-allowed' : 'pointer';
   message.textContent = '';
   lucide.createIcons();
 }
@@ -54,8 +81,8 @@ form.addEventListener('submit', async event => {
   const endpoint = registering ? '/api/auth/register' : '/api/auth/login';
   try {
     if (registering) {
-      const cleanedPhone = (data.phone || '').replace(/\D/g, '');
-      if (cleanedPhone.length !== 10) {
+      const cleanedPhone = (data.phone || '').trim();
+      if (!/^\d{10}$/.test(cleanedPhone)) {
         throw new Error('Phone number must be exactly 10 digits.');
       }
       data.phone = cleanedPhone;

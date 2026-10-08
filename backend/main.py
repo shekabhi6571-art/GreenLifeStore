@@ -12,7 +12,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from dotenv import load_dotenv
 import pymysql
 
@@ -331,7 +331,15 @@ class ProfileCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=100)
     email: EmailStr
     password: str = Field(min_length=6, max_length=100)
-    phone: str = Field(pattern=r"^\d{10}$")
+    phone: str
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not re.fullmatch(r"\d{10}", cleaned):
+            raise ValueError("Phone number must be exactly 10 digits.")
+        return cleaned
 
 
 def hash_password(password: str) -> str:
